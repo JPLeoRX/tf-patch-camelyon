@@ -5,9 +5,15 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 
 
-# Flip image
-def flip_image(image, label):
+# Flip image (horizontal)
+def flip_image_horizontal(image, label):
     image = tf.image.flip_left_right(image)
+    return image, label
+
+
+# Flip image (vertical)
+def flip_image_vertical(image, label):
+    image = tf.image.flip_up_down(image)
     return image, label
 
 
@@ -35,15 +41,15 @@ def build_model():
     # Declare model architecture
     model = tf.keras.Sequential([
         tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same', input_shape=(96, 96, 3)), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        # tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPooling2D(8, 8), tf.keras.layers.Dropout(0.5),
 
+        tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.5),
-        #
+        tf.keras.layers.MaxPooling2D(8, 8), tf.keras.layers.Dropout(0.5),
+
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
@@ -55,7 +61,7 @@ def build_model():
         # tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.5),
 
         tf.keras.layers.Flatten(),
-        # tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dense(2, activation='softmax')
     ])
 
@@ -73,11 +79,13 @@ def build_model():
 
 # Augment dataset
 def augment_dataset(dataset_train_raw):
-    # dataset_train_flipped = dataset_train_raw.map(flip_image)
+    dataset_train_flipped_1 = dataset_train_raw.map(flip_image_horizontal)
+    dataset_train_flipped_2 = dataset_train_raw.map(flip_image_vertical)
     # dataset_train_rotated_1 = dataset_train_raw.map(rotate_image_1)
     # dataset_train_rotated_2 = dataset_train_raw.map(rotate_image_2)
     # return dataset_train_raw.concatenate(dataset_train_flipped).concatenate(dataset_train_rotated_1).concatenate(dataset_train_rotated_2)
-    return dataset_train_raw
+    return dataset_train_raw.concatenate(dataset_train_flipped_1).concatenate(dataset_train_flipped_2)
+    # return dataset_train_raw
 
 # Define distributed strategy
 strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
@@ -85,7 +93,7 @@ NUM_OF_WORKERS = strategy.num_replicas_in_sync
 print("{} replicas in distribution".format(NUM_OF_WORKERS))
 
 # Determine datasets buffer/batch sizes
-BUFFER_SIZE = 40000
+BUFFER_SIZE = 10000
 BATCH_SIZE_PER_REPLICA = 128
 BATCH_SIZE = BATCH_SIZE_PER_REPLICA * NUM_OF_WORKERS
 print("{} batch size".format(BATCH_SIZE))
@@ -108,7 +116,7 @@ dataset_test = dataset_test_raw.map(scale_image).batch(BATCH_SIZE).with_options(
 # Build and train the model as multi worker
 with strategy.scope():
     model = build_model()
-model.fit(x=dataset_train, epochs=2)
+model.fit(x=dataset_train, epochs=5)
 
 # Show model summary, and evaluate it
 model.summary()
