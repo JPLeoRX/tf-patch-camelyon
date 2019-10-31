@@ -41,12 +41,12 @@ def build_model():
     # Declare model architecture
     model = tf.keras.Sequential([
         tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same', input_shape=(96, 96, 3)), tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        # tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPooling2D(8, 8), tf.keras.layers.Dropout(0.5),
 
         tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        # tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPooling2D(8, 8), tf.keras.layers.Dropout(0.5),
 
@@ -61,7 +61,7 @@ def build_model():
         # tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.5),
 
         tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(256, activation='relu'),
+        # tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dense(2, activation='softmax')
     ])
 
@@ -93,8 +93,8 @@ NUM_OF_WORKERS = strategy.num_replicas_in_sync
 print("{} replicas in distribution".format(NUM_OF_WORKERS))
 
 # Determine datasets buffer/batch sizes
-BUFFER_SIZE = 10000
-BATCH_SIZE_PER_REPLICA = 128
+BUFFER_SIZE = 60000
+BATCH_SIZE_PER_REPLICA = 256
 BATCH_SIZE = BATCH_SIZE_PER_REPLICA * NUM_OF_WORKERS
 print("{} batch size".format(BATCH_SIZE))
 
@@ -116,7 +116,7 @@ dataset_test = dataset_test_raw.map(scale_image).batch(BATCH_SIZE).with_options(
 # Build and train the model as multi worker
 with strategy.scope():
     model = build_model()
-model.fit(x=dataset_train, epochs=5)
+model.fit(x=dataset_train, epochs=3)
 
 # Show model summary, and evaluate it
 model.summary()
