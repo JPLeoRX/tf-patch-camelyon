@@ -40,28 +40,28 @@ def scale_image(image, label):
 def build_model():
     # Declare model architecture
     model = tf.keras.Sequential([
-        tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same', input_shape=(96, 96, 3)), tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Conv2D(100, 7, activation='relu', padding='same', input_shape=(96, 96, 3)), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(20, 9, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPooling2D(8, 8), tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.6),
 
-        tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Conv2D(100, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPooling2D(8, 8), tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.6),
 
+        tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        # tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.6),
+
+        tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
+        # tf.keras.layers.Conv2D(40, 5, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
         # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.5),
-        #
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.Conv2D(100, 3, activation='relu', padding='same'), tf.keras.layers.BatchNormalization(),
-        # tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.MaxPooling2D(2, 2), tf.keras.layers.Dropout(0.6),
 
         tf.keras.layers.Flatten(),
-        # tf.keras.layers.Dense(256, activation='relu'),
+        tf.keras.layers.Dense(256, activation='relu'),
         tf.keras.layers.Dense(2, activation='softmax')
     ])
 
@@ -79,13 +79,13 @@ def build_model():
 
 # Augment dataset
 def augment_dataset(dataset_train_raw):
-    dataset_train_flipped_1 = dataset_train_raw.map(flip_image_horizontal)
-    dataset_train_flipped_2 = dataset_train_raw.map(flip_image_vertical)
+    # dataset_train_flipped_1 = dataset_train_raw.map(flip_image_horizontal)
+    # dataset_train_flipped_2 = dataset_train_raw.map(flip_image_vertical)
     # dataset_train_rotated_1 = dataset_train_raw.map(rotate_image_1)
     # dataset_train_rotated_2 = dataset_train_raw.map(rotate_image_2)
     # return dataset_train_raw.concatenate(dataset_train_flipped).concatenate(dataset_train_rotated_1).concatenate(dataset_train_rotated_2)
-    return dataset_train_raw.concatenate(dataset_train_flipped_1).concatenate(dataset_train_flipped_2)
-    # return dataset_train_raw
+    # return dataset_train_raw.concatenate(dataset_train_flipped_1).concatenate(dataset_train_flipped_2)
+    return dataset_train_raw
 
 # Define distributed strategy
 strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
