@@ -116,7 +116,7 @@ dataset_test = dataset_test_raw.map(scale_image).batch(BATCH_SIZE).with_options(
 # Build and train the model as multi worker
 with strategy.scope():
     model = build_model()
-model.fit(x=dataset_train, epochs=3)
+model.fit(x=dataset_train, epochs=10)
 
 # Show model summary, and evaluate it
 model.summary()
